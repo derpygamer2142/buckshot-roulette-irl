@@ -1,0 +1,9 @@
+{
+  "dependencies": {
+    "node-wifi": "^2.0.16",
+    "pigpio": "^3.3.1"
+  },
+  "scripts": {
+    "install": "sudo apt-get update && sudo apt-get install pigpio"
+  }
+}
