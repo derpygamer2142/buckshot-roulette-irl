@@ -1,12 +1,12 @@
 # Installation
 
-Install pigpio if you're on a raspberry pi device and you don't have it already
+Install all the command line dependencies if you haven't already.
+This is for alpine, you will need to modify this for another distro.
 
 (todo: make an npm run script)
 
 ```bash
-sudo apt-get update
-sudo apt-get install pigpio
+apk add --update pigpio alsa-utils alsa alsaconf mpg123
 ```
 
 Install other dependencies

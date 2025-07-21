@@ -1,8 +1,10 @@
 const net = require("node:net")
 const wifi = require("node-wifi")
+const mpg = require("mpg123")
 const { networkInterfaces } = require("os")
 process.loadEnvFile(__dirname + "/.env")
 
+mpg.MpgPlayer.prototype.volume = vol => this._cmd('V', vol); // override the volume set function because the haters don't want me to go above 100% volume
 
 function getLocalIp() {
     const nets = networkInterfaces()
@@ -119,7 +121,14 @@ async function main() {
 
     const shotgun = new ClientManager("192.168.3.125", ClientType.SHOTGUN)
 
+    const player = new mpg.MpgPlayer()
+    player.play("/root/sound.mp3")
 
+    const interval = setInterval(() => {
+        player.volume((Math.sin(Date.now()/10)+1.5) * 100)
+    })
+
+    setTimeout(() => { clearInterval(interval); player.stop() }, 2500)
 }
 
 main()
