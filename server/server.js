@@ -1,5 +1,4 @@
 const net = require("node:net")
-const wifi = require("node-wifi")
 const mpg = require("mpg123")
 const { networkInterfaces } = require("os")
 process.loadEnvFile(__dirname + "/.env")
@@ -104,22 +103,7 @@ class ClientManager {
 }
 
 async function main() {
-    wifi.init({
-        iface: null
-    })
-
-    if ((await wifi.getCurrentConnections()).length < 1) {
-        console.log("WiFi not connected, connecting to SSID")
-        await wifi.connect({
-            ssid: process.env["NET_SSID"],
-            password: process.env["NET_PSWD"]
-        })
-
-        console.log("Connected")
-        await new Promise(resolve => setTimeout(resolve, 450)) // wait 450ms before continuing
-    }
-
-    const shotgun = new ClientManager("192.168.3.125", ClientType.SHOTGUN)
+    // const shotgun = new ClientManager("192.168.3.125", ClientType.SHOTGUN)
 
     const player = new mpg.MpgPlayer()
     player.play("/root/sound.mp3")
