@@ -1,7 +1,15 @@
 const net = require("node:net")
 const mpg = require("mpg123")
+const LCD = require("./lcd1602.js")
+const fs = require("fs")
 const { networkInterfaces } = require("os")
-process.loadEnvFile(__dirname + "/.env")
+try {
+    process.loadEnvFile(__dirname + "/.env")
+}
+catch {
+    fs.writeFileSync(__dirname + "/.env", "")
+    process.loadEnvFile(__dirname + "/.env")
+}
 
 
 function getLocalIp() {
@@ -113,6 +121,13 @@ async function main() {
     })
 
     setTimeout(() => { clearInterval(interval); player.stop() }, 2500)
+
+    const lcd = new LCD(12, 11, 
+                        25, 8, 7, 1 // who thought this numbering scheme was a good idea
+                    )
+    
+    await lcd.begin(16, 2)
+    await lcd.print("skibidi")
 }
 
 main()
