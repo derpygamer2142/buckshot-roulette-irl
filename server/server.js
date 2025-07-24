@@ -2,7 +2,9 @@ const net = require("node:net")
 const mpg = require("mpg123")
 const LCD = require("./lcd1602.js")
 const fs = require("fs")
+const http = require("http")
 const { networkInterfaces } = require("os")
+
 try {
     process.loadEnvFile(__dirname + "/.env")
 }
@@ -130,4 +132,45 @@ async function main() {
     await lcd.print("skibidi")
 }
 
-main()
+//main()
+
+const server = http.createServer((req, res) => {
+    console.log("method:", req.method)
+
+    // todo: if this table ever ends up anywhere in public, do some request verification
+
+    if (req.method === "GET") {
+        res.writeHead(200, {
+            "Content-Type": "text/html",
+            "Connection": "close"
+        })
+
+        const stream = fs.createReadStream(__dirname + "/GENERAL_RELEASE.html")
+
+        stream.pipe(res)
+
+        stream.on("error", (err) => {
+            console.error("Error", err)
+            res.writeHead(500)
+            res.end("Internal server error")
+        })        
+    }
+    else {
+        let body = []
+        req.on("data", (chunk) => {
+            body.push(chunk)
+        })
+        req.on("end", () => {
+            const data = Buffer.concat(body).toString()
+            console.log("Received name data", data)
+            res.writeHead(200).end("OK")
+        })
+        
+    }
+
+
+})
+
+server.listen(8000, "127.0.0.1", async () => {
+    console.log("HTTP server listening on http://127.0.0.1:8000")
+})

@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GENERAL RELEASE OF LIABILITY</title>
+</head>
+<body>
+    <div id="general-release">
+        <h1>GENERAL RELEASE OF LIABILITY</h1>
+
+        <hr>
+
+        <p>This General Release ("Release") is made on 22 day of January, 2018 between
+    ████████ at ████████████████████████████████ ("Releasor") and ████████ at ████████████████████████ ("Releasee").</p>
+
+        <p>1. Releasor and anyone claiming on Releasor's behalf releases and forever discharges Releasees and its affiliates,
+        successors, officers, employees, representatives, partners, agents and anyone claiming through them (collectively, the "Released Parties")
+        in their individual and/or corporate capacities from any and all claims, liabilities, obligations, promises, agreements, disputes, demands, damages,
+        causes of action of any nature and kind, known or unknown, which Releasor has or ever had or may in the future have against Releasees or any of the
+        Released Parties arising out of or relating to: the termination of a contractual relationship between the Releasor and the Releasee ("Claims").</p>
+
+        <p> 2. In exchange for the release of Claims, Releasee will provide Releasor a payment in the amount of $10,000.00. 
+            In consideration of such payment, Releasor agrees to accept the payment as full and complete settlement and satisfaction 
+            of any present and prospective claims.</p>
+
+        <p> 3. This Release shall not be in any way construed as an admission by the Releasee
+            that it has acted wrongfully with respect to Releasor or any other preson, that it admits liability
+            or responsibility at any time for any purpose, or that Releasor has any rights whatsoever against the Releasee.</p>
+        
+        <p> 4. This release is not legally binding in any way, shape or form and is purely for show.</p>
+
+        <div id="name-entry">
+            <h2>ENTER NAME:</h2>
+            <input type="text" maxlength="6" minlength="1">
+            <br>
+            <button>Enter</button>
+        </div>
+
+        <b>Release/Waiver Agreement (Rev. 133C7EB)</b>
+    </div>
+
+    <script> 
+    const i=document.querySelector("input");i.value="";i.addEventListener("input",()=>i.value=i.value.toUpperCase()); // force inputs to uppercase
+    const b=document.querySelector("button");b.addEventListener("click",async ()=>{await fetch("http://localhost:8000",{method:"POST", body:i.value});location.reload()})
+    </script>
+
+
+    <style>
+        body {
+            background-color: black;
+            font-family: "Arial";
+        }
+
+        h1, h2 {
+            transform: scaleY(1.5)
+        }
+
+        #general-release {
+            width: 960px;
+            background-color: white;
+            position: absolute;
+            top: 0;
+            left: 0;
+            height: fit-content;
+            padding-bottom: 50px;
+        }
+
+        h1 {
+            font-size: 75px;
+            max-width: 90%;
+            margin-left: auto;
+            margin-right: auto;
+            text-align: center;
+
+        }
+
+        p {
+            max-width: 90%;
+            position: relative;
+            left: 5%;
+            font-size: large;
+            font-weight: bold;
+            margin-bottom: 100px;
+            transform: scaleY(1.25)
+        }
+
+        #name-entry {
+            float: right;
+            margin-right: 25px;
+            width: fit-content;
+        }
+
+        h2 {
+            text-align: left;
+            font-size: 250%;
+            margin-bottom: 10px;
+        }
+
+        input {
+            border: 5px solid black;
+            border-bottom: none !important;
+            border-right: none !important;
+
+            width: 580px; /* lots of magic numbers because i'm lazy and trying to make this accurate to the original, not look good */
+            height: 125px;
+
+            font-size: 100px;
+        }
+
+        input:focus {
+            outline: none;
+        }
+
+        b {
+            position: absolute;
+            bottom: 1%;
+            left: 7.5%;
+        }
+
+        button {
+            width: 100%;
+            height: 45px;
+            font-size: larger;
+        }
+    </style>
+</body>
+</html>
