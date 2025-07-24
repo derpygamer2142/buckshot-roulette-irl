@@ -29,7 +29,9 @@ function getLocalIp() {
     throw new Error("Could not find local ip", networkInterfaces())
 }
 
-console.log("Now connecting to clients from " + getLocalIp())
+const localIp = getLocalIp()
+
+console.log("Now connecting to clients from " + localIp)
 
 /**
  * @readonly
@@ -111,28 +113,40 @@ class ClientManager {
     }
 }
 
+const lcd = new LCD(12, 11, 
+                    25, 8, 7, 1 // who thought this numbering scheme was a good idea
+                )
+
+lcd.begin(16, 2)
+
+const player = new mpg.MpgPlayer()
+player.volume = vol => player._cmd('V', vol)
+player.play("/root/sound.mp3") // override the volume set function because the haters don't want me to go above 100% volume
+
+const interval = setInterval(() => {
+    player.volume((Math.sin(Date.now()/10)+1.5) * 100)
+})
+
+setTimeout(() => { clearInterval(interval); player.stop() }, 2500)
+
 async function main() {
-    // const shotgun = new ClientManager("192.168.3.125", ClientType.SHOTGUN)
+    const shotgun = new ClientManager("192.168.3.125", ClientType.SHOTGUN)
 
-    const player = new mpg.MpgPlayer()
-    player.volume = vol => player._cmd('V', vol)
-    player.play("/root/sound.mp3") // override the volume set function because the haters don't want me to go above 100% volume
-
-    const interval = setInterval(() => {
-        player.volume((Math.sin(Date.now()/10)+1.5) * 100)
-    })
-
-    setTimeout(() => { clearInterval(interval); player.stop() }, 2500)
-
-    const lcd = new LCD(12, 11, 
-                        25, 8, 7, 1 // who thought this numbering scheme was a good idea
-                    )
     
-    await lcd.begin(16, 2)
-    await lcd.print("skibidi")
+    
 }
 
-//main()
+async function writeLCD(name) {
+    await lcd.clear()
+    await lcd.rightToLeft()
+    await lcd.setCursor(6, 0) // left of the middle with 1 space padding on each side
+    await lcd.print("DEALER")
+    await lcd.leftToRight()
+    await lcd.setCursor(8, 0) // right of the middle
+    await lcd.print(name)
+}
+
+main()
 
 const server = http.createServer((req, res) => {
     console.log("method:", req.method)
@@ -153,7 +167,7 @@ const server = http.createServer((req, res) => {
             console.error("Error", err)
             res.writeHead(500)
             res.end("Internal server error")
-        })        
+        })
     }
     else {
         let body = []
@@ -164,6 +178,8 @@ const server = http.createServer((req, res) => {
             const data = Buffer.concat(body).toString()
             console.log("Received name data", data)
             res.writeHead(200).end("OK")
+
+            writeLCD(data)
         })
         
     }
@@ -171,6 +187,6 @@ const server = http.createServer((req, res) => {
 
 })
 
-server.listen(8000, "127.0.0.1", async () => {
-    console.log("HTTP server listening on http://127.0.0.1:8000")
+server.listen(8000, localIp, async () => {
+    console.log(`HTTP server listening on http://${localIp}:8000`)
 })
