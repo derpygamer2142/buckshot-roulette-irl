@@ -146,7 +146,7 @@ async function writeLCD(name) {
     await lcd.print(name)
 }
 
-main()
+// main()
 
 const server = http.createServer((req, res) => {
     console.log("method:", req.method)
