@@ -42,7 +42,7 @@
 
     <script> 
     const i=document.querySelector("input");i.value="";i.addEventListener("input",()=>i.value=i.value.toUpperCase()); // force inputs to uppercase
-    const b=document.querySelector("button");b.addEventListener("click",async ()=>{if (i.value!=="GOD"&&i.value!=="DEALER") await fetch("http://192.168.5.248:8000",{method:"POST", body:i.value}),location.reload(); else document.querySelector("h2").style.color="red",setTimeout(()=>location.reload(),2500)}) // make sure the name isn't taken and send it
+    const b=document.querySelector("button");b.addEventListener("click",async ()=>{if (i.value!=="GOD"&&i.value!=="DEALER") await fetch("http://192.168.3.209:8000",{method:"POST", body:i.value}),location.reload(); else document.querySelector("h2").style.color="red",setTimeout(()=>location.reload(),2500)}) // make sure the name isn't taken and send it
     </script>
 
 

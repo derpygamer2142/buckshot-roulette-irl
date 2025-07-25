@@ -179,10 +179,9 @@ class LCD {
     // high level user commands
 
     async print(text) { // not sure if this is right
-        const data = await (new Blob([text]).bytes())
 
         for (const char of data) {
-            await this.send(char, HIGH)
+            await this.send(char.charCodeAt(0), HIGH)
         }
     }
 
