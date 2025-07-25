@@ -113,13 +113,13 @@ class ClientManager {
     }
 }
 
-const lcd = new LCD(12, 11, 
+const lcd = new LCD(9, 11, 
                     25, 8, 7, 1 // who thought this numbering scheme was a good idea
                 )
 
 lcd.begin(16, 2)
 
-const player = new mpg.MpgPlayer()
+/*const player = new mpg.MpgPlayer()
 player.volume = vol => player._cmd('V', vol)
 player.play("/root/sound.mp3") // override the volume set function because the haters don't want me to go above 100% volume
 
@@ -134,7 +134,7 @@ async function main() {
 
     
     
-}
+}*/
 
 async function writeLCD(name) {
     await lcd.clear()
