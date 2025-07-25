@@ -100,7 +100,7 @@ class LCD {
         
         this._enable_pin = new Gpio(enable, { mode: Gpio.OUTPUT })
 
-        this._data_pins = [d0, d1, d2, d3, d4, d5, d6, d7].map((pin) => new Gpio(pin, { mode: Gpio.OUTPUT }))
+        this._data_pins = [d0, d1, d2, d3, d4, d5, d6, d7].map((pin) => pin === 0 ? null : new Gpio(pin, { mode: Gpio.OUTPUT }))
 
         if (fourbitmode) {
             this._displayfunction = LCD_4BITMODE | LCD_1LINE | LCD_5x8DOTS
@@ -181,6 +181,7 @@ class LCD {
     async print(text) { // not sure if this is right
 
         for (const char of text) {
+            console.log("sending", char, char.charCodeAt(0))
             await this.send(char.charCodeAt(0), HIGH)
         }
     }
@@ -304,8 +305,15 @@ class LCD {
         return delay(1) // why must this be asynchronous, it is polluting all of the other functions
     }
 
+    /**
+     * 
+     * @param {Number} value 
+     * @returns 
+     */
     async write4bits(value) {
+        console.log("4 bit write:", value.toString(2), value)
         for (let i = 0; i < 4; i++) {
+            console.log("writing", (value >> i) & 0x01, "to pin", i)
             this._data_pins[i].digitalWrite((value >> i) & 0x01)
         }
 
