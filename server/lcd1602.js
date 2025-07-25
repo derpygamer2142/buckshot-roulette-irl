@@ -180,7 +180,7 @@ class LCD {
 
     async print(text) { // not sure if this is right
 
-        for (const char of data) {
+        for (const char of text) {
             await this.send(char.charCodeAt(0), HIGH)
         }
     }
