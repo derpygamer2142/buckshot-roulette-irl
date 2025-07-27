@@ -1,8 +1,16 @@
 const LCD = require("./lcd1602.js")
 
-const lcd = new LCD(9, 11, 
+
+
+async function main() {
+    const lcd = new LCD(9, 11, 
                     25, 8, 7, 1)
 
-lcd.begin(16, 2).then(() => {
-    lcd.print("H")
-})
+    await lcd.begin(16, 2)
+    
+    console.log("\n\nDone initializing\n\n")
+
+    await lcd.print("H")
+}
+
+main()

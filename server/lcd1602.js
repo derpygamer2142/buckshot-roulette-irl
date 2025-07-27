@@ -129,52 +129,49 @@ class LCD {
 
         // pins are already initialized
         
-        const initialize = async () => { // wait 50ms for lcd to turn on
-            this._rs_pin.digitalWrite(LOW)
-            this._enable_pin.digitalWrite(LOW)
-            if (this._rw_pin) this._rw_pin.digitalWrite(LOW)
+        await delay(50) // wait 50ms for lcd to turn on
+            
+        
+        this._rs_pin.digitalWrite(LOW)
+        this._enable_pin.digitalWrite(LOW)
+        if (this._rw_pin) this._rw_pin.digitalWrite(LOW)
 
-            if (! (this._displayfunction & LCD_8BITMODE)) {
-                // put it into 4 bit mode
-                console.log("setting to 4 bit mode")
-                for (let i = 0; i < 3; i++) {
-                    await this.write4bits(0x03)
-                    await delay(5)
-                }
-
-                await this.write4bits(0x02)
-                console.log("should be finished setting")
-            }
-            else {
-                await this.command(LCD_FUNCTIONSET | this._displayfunction)
+        if (! (this._displayfunction & LCD_8BITMODE)) {
+            // put it into 4 bit mode
+            console.log("setting to 4 bit mode")
+            for (let i = 0; i < 3; i++) {
+                await this.write4bits(0x03)
                 await delay(5)
-                await this.command(LCD_FUNCTIONSET | this._displayfunction)
-                await delay(5)
-                await this.command(LCD_FUNCTIONSET | this._displayfunction)
             }
 
-            // set # lines, font size, etc.
+            await this.write4bits(0x02)
+            console.log("should be finished setting")
+        }
+        else {
             await this.command(LCD_FUNCTIONSET | this._displayfunction)
-            console.log("done setting all the functions")
-
-            // turn on display with no cursor or blinking
-            this._displaycontrol = LCD_DISPLAYON | LCD_CURSOROFF | LCD_BLINKOFF
-            await this.display()
-            console.log("display turned on")
-
-            // clear display
-            await this.clear()
-            console.log("display cleared")
-
-            // default text direction
-            this._displaymode = LCD_ENTRYLEFT | LCD_ENTRYSHIFTDECREMENT
-
-            await this.command(LCD_ENTRYMODESET | this._displaymode)
+            await delay(5)
+            await this.command(LCD_FUNCTIONSET | this._displayfunction)
+            await delay(5)
+            await this.command(LCD_FUNCTIONSET | this._displayfunction)
         }
 
-        initialize.bind(this)
+        // set # lines, font size, etc.
+        await this.command(LCD_FUNCTIONSET | this._displayfunction)
+        console.log("done setting all the functions")
 
-        setTimeout(initialize, 50)
+        // turn on display with no cursor or blinking
+        this._displaycontrol = LCD_DISPLAYON | LCD_CURSOROFF | LCD_BLINKOFF
+        await this.display()
+        console.log("display turned on")
+
+        // clear display
+        await this.clear()
+        console.log("display cleared")
+
+        // default text direction
+        this._displaymode = LCD_ENTRYLEFT | LCD_ENTRYSHIFTDECREMENT
+
+        return this.command(LCD_ENTRYMODESET | this._displaymode) // set the things
     }
 
     setRowOffsets(row0, row1, row2, row3) {
