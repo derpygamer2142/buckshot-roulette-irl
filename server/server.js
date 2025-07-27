@@ -119,34 +119,26 @@ const lcd = new LCD(9, 11,
 
 lcd.begin(16, 2)
 
-/*const player = new mpg.MpgPlayer()
+const player = new mpg.MpgPlayer()
 player.volume = vol => player._cmd('V', vol)
-player.play("/root/sound.mp3") // override the volume set function because the haters don't want me to go above 100% volume
+player.play("/root/music/General Release.mp3") // override the volume set function because the haters don't want me to go above 100% volume
 
-const interval = setInterval(() => {
-    player.volume((Math.sin(Date.now()/10)+1.5) * 100)
-})
-
-setTimeout(() => { clearInterval(interval); player.stop() }, 2500)
+setTimeout(() => player.stop(), 2500)
 
 async function main() {
     const shotgun = new ClientManager("192.168.3.125", ClientType.SHOTGUN)
 
     
     
-}*/
+}
 
 async function writeLCD(name) {
     await lcd.clear()
-    await lcd.rightToLeft()
-    await lcd.setCursor(6, 0) // left of the middle with 1 space padding on each side
+    await lcd.home()
     await lcd.print("DEALER")
-    await lcd.leftToRight()
-    await lcd.setCursor(8, 0) // right of the middle
+    await lcd.setCursor(16 - name.length, 0) // right of the middle
     await lcd.print(name)
 }
-
-// main()
 
 const server = http.createServer((req, res) => {
     console.log("method:", req.method)

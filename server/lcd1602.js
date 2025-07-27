@@ -138,14 +138,12 @@ class LCD {
 
         if (! (this._displayfunction & LCD_8BITMODE)) {
             // put it into 4 bit mode
-            console.log("setting to 4 bit mode")
             for (let i = 0; i < 3; i++) {
                 await this.write4bits(0x03)
                 await delay(5)
             }
 
             await this.write4bits(0x02)
-            console.log("should be finished setting")
         }
         else {
             await this.command(LCD_FUNCTIONSET | this._displayfunction)
@@ -157,16 +155,13 @@ class LCD {
 
         // set # lines, font size, etc.
         await this.command(LCD_FUNCTIONSET | this._displayfunction)
-        console.log("done setting all the functions")
 
         // turn on display with no cursor or blinking
         this._displaycontrol = LCD_DISPLAYON | LCD_CURSOROFF | LCD_BLINKOFF
         await this.display()
-        console.log("display turned on")
 
         // clear display
         await this.clear()
-        console.log("display cleared")
 
         // default text direction
         this._displaymode = LCD_ENTRYLEFT | LCD_ENTRYSHIFTDECREMENT
@@ -183,19 +178,18 @@ class LCD {
     async print(text) { // not sure if this is right
 
         for (const char of text) {
-            console.log("sending", char, char.charCodeAt(0))
             await this.send(char.charCodeAt(0), HIGH)
         }
     }
 
     async clear() {
         await this.command(LCD_CLEARDISPLAY) // clear display, set cursor position to zero
-        return delay(5)
+        return delay(2)
     }
 
     async home() {
         await this.command(LCD_RETURNHOME) // set cursor position to zero
-        return delay(5)
+        return delay(2)
     }
 
     async setCursor(col, row) {
@@ -293,7 +287,6 @@ class LCD {
             return this.write8bits(value)
         }
         else {
-            console.log("writing data in 4 bit mode", value, value.toString(2))
             await this.write4bits(value >> 4)
             return this.write4bits(value)
         }
@@ -301,11 +294,11 @@ class LCD {
 
     async pulseEnable() {
         this._enable_pin.digitalWrite(LOW)
-        await delay(10)
+        await delay(1)
         this._enable_pin.digitalWrite(HIGH)
-        await delay(10)
+        await delay(1)
         this._enable_pin.digitalWrite(LOW)
-        return delay(10) // why must this be asynchronous, it is polluting all of the other functions
+        return delay(1) // why must this be asynchronous, it is polluting all of the other functions
     }
 
     /**
@@ -314,9 +307,7 @@ class LCD {
      * @returns 
      */
     async write4bits(value) {
-        console.log("4 bit write:", value.toString(2), value)
         for (let i = 0; i < 4; i++) {
-            console.log("writing", (value >> i) & 0x01, "to pin", i)
             this._data_pins[i].digitalWrite((value >> i) & 0x01)
         }
 
