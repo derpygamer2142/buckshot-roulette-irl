@@ -111,6 +111,12 @@ function updateHealthDisplay() {
     dealerHealthLEDs.forEach((v, i) => v.digitalWrite(+((i+1) > dealerHealth)) )
 }
 
+function playSFX(file, callback) {
+    musicPlayer.volume(50)
+    sfxPlayer.play(__dirname + "/audio/" + file)
+    sfxPlayer.once("end", () => musicPlayer.volume(100), callback())
+}
+
 
 class ClientManager {
     constructor(ip, type) {
@@ -174,34 +180,38 @@ class ClientManager {
                 /** @description false = self, true = opposite */
                 const target = !!Number(data[0])
                 if (!shotgunFired) {
+                    console.log("firing shotgun", shells)
                     const current = shells[0]
                     if (current) {
-                        musicPlayer.volume(75)
-                        sfxPlayer.play(__dirname + "/audio/gunshot_live.mp3")
-                        sfxPlayer.once("end", () => {
+                        playerSFX("gunshot_live.mp3", () => {
                             setTimeout(() => {
-                                sfxPlayer.play(__dirname + "/audio/defib discharge.mp3")
-                                sfxPlayer.once("end", () => musicPlayer.volume(100))
+                                playSFX("defib discharge.mp3", () => {
+                                    if (turn ^ target) {
+                                        playerHealth -= 1
+                                        playerTaser.digitalWrite(1)
+                                        setTimeout(() => playerTaser.digitalWrite(0), 500) // tase them for 500ms
+                                        console.log("Player shot", playerHealth)
+                                    }
+                                    else {
+                                        dealerHealth -= 1
+                                        dealerTaser.digitalWrite(1)
+                                        setTimeout(() => dealerTaser.digitalWrite(0), 500) // tase them for 500ms
+                                        console.log("Dealer shot", dealerHealth)
+                                    }
+                                    updateHealthDisplay()
+
+                                    playSFX("health reduce.mp3")
+                                })
                             }, 1500)
 
-                            if (turn ^ target) {
-                                playerHealth -= 1
-                                playerTaser.digitalWrite(1)
-                                setTimeout(() => playerTaser.digitalWrite(0), 500) // tase them for 500ms
-                                console.log("Player shot", playerHealth)
-                            }
-                            else {
-                                dealerHealth -= 1
-                                dealerTaser.digitalWrite(1)
-                                setTimeout(() => dealerTaser.digitalWrite(0), 500) // tase them for 500ms
-                                console.log("Dealer shot", dealerHealth)
-                            }
-                            updateHealthDisplay()                            
+                         
                         })
 
                     }
                     else {
+                        musicPlayer.volume(50)
                         sfxPlayer.play(__dirname + "/audio/gunshot_blank.mp3")
+                        sfxPlayer.once("end", () => musicPlayer.volume(100))
                     }
 
                     shotgunFired = true
@@ -214,6 +224,8 @@ class ClientManager {
                 if (shotgunFired) { // keep silly billies from racking the shotgun too much
                     shells.unshift()
                     shotgunFired = false
+                    console.log("racking shotgun")
+                    playSFX("rack shotgun.mp3")
 
                     if (shells.length < 1) {
                         const amounts = SHELLVARIATIONS[Math.floor(Math.random()*(SHELLVARIATIONS.length+1))]
@@ -221,6 +233,8 @@ class ClientManager {
                         for (let b = 0; b < amounts[1]; b++) shells.push(false)
                         
                         for (let i = 0; i < 4; i++) shells = shells.sort(()=>Math.random()-.5)
+                        
+                        
                     }
                 }
 
