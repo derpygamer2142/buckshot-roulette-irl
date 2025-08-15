@@ -4,6 +4,7 @@ const LCD = require("./lcd1602.js")
 const fs = require("fs")
 const http = require("http")
 const { networkInterfaces } = require("os")
+const { Gpio } = require("pigpio")
 
 try {
     process.loadEnvFile(__dirname + "/.env")
@@ -31,7 +32,7 @@ function getLocalIp() {
 
 const localIp = getLocalIp()
 
-console.log("Now connecting to clients from " + localIp)
+
 
 /**
  * @readonly
@@ -49,15 +50,74 @@ const ClientType = {
  */
 const Event = {
     "PING": "PING",
-    "PONG": "PONG"
+    "PONG": "PONG",
+    "SHOTGUNEJECT": "SHOTGUNEJECT",
+    "SHOTGUNFIRE": "SHOTGUNFIRE"
 }
+
+const lcd = new LCD(9, 11, 
+                    25, 8, 7, 1 // who thought this numbering scheme was a good idea
+                )
+
+lcd.begin(16, 2)
+
+const musicPlayer = new mpg.MpgPlayer()
+musicPlayer.volume = vol => musicPlayer._cmd('V', vol) // override the volume set function because the haters don't want me to go above 100% volume
+musicPlayer.play("/root/music/General Release.mp3")
+
+const sfxPlayer = new mpg.MpgPlayer()
+sfxPlayer.volume = vol => sfxPlayer._cmd('V', vol)
+
+/* game logic variables */
+let playerHealth = 6
+let dealerHealth = 6
+let shells = []
+const SHELLVARIATIONS = [
+    [1,1], // live, blank
+    [1,2],
+    [2,2],
+    [2,3],
+    [3,3],
+    [2,4],
+    [4,4],
+    [3,4]
+]
+/** @description false = player, true = dealer */
+let turn = false
+let shotgunFired = false
+
+// according to the wiki the max number of charges in double or nothing is 4
+// https://buckshot-roulette.fandom.com/wiki/Double_or_Nothing#Gameplay
+// the pi zero doesn't really have enough pins for me to do 6 LEDs each
+// so i'm going to go with that
+// i considered getting a pwm expander thing but:
+/*
+ * i'm lazy
+ * i don't got those kinds of bands
+ * i would probably need to implement another library in js
+ * i would probably use all the pwm pins and have the same issue
+*/
+const playerHealthLEDs = [1,2,3,4].map((v) => new Gpio(v, { mode: Gpio.OUTPUT})) 
+const dealerHealthLEDs = [1,2,3,4].map((v) => new Gpio(v, { mode: Gpio.OUTPUT}))
+
+// brendan eich definitely intended for javascript to be used to control tasers in a real life adaptation of
+// a game about organ harvesting(headcanon) and gambling
+const playerTaser = new Gpio(1, { mode: Gpio.OUTPUT})
+const dealerTaser = new Gpio(1, { mode: Gpio.OUTPUT})
+
+function updateHealthDisplay() {
+    // todo: flashing when on 1 health
+    playerHealthLEDs.forEach((v, i) => v.digitalWrite(+((i+1) > playerHealth)) )
+    dealerHealthLEDs.forEach((v, i) => v.digitalWrite(+((i+1) > dealerHealth)) )
+}
+
 
 class ClientManager {
     constructor(ip, type) {
         this.client = net.createConnection({ port: 80, host: ip }, () => {
             console.log('Connected to client ' + ip);
 
-        this.send("PING")
+            this.send("PING")
         });
         this.ip = ip
         this.type = type
@@ -109,28 +169,78 @@ class ClientManager {
                 
                 break
             }
+
+            case (Event.SHOTGUNFIRE): {
+                /** @description false = self, true = opposite */
+                const target = !!Number(data[0])
+                if (!shotgunFired) {
+                    const current = shells[0]
+                    if (current) {
+                        musicPlayer.volume(75)
+                        sfxPlayer.play(__dirname + "/audio/gunshot_live.mp3")
+                        sfxPlayer.once("end", () => {
+                            setTimeout(() => {
+                                sfxPlayer.play(__dirname + "/audio/defib discharge.mp3")
+                                sfxPlayer.once("end", () => musicPlayer.volume(100))
+                            }, 1500)
+
+                            if (turn ^ target) {
+                                playerHealth -= 1
+                                playerTaser.digitalWrite(1)
+                                setTimeout(() => playerTaser.digitalWrite(0), 500) // tase them for 500ms
+                                console.log("Player shot", playerHealth)
+                            }
+                            else {
+                                dealerHealth -= 1
+                                dealerTaser.digitalWrite(1)
+                                setTimeout(() => dealerTaser.digitalWrite(0), 500) // tase them for 500ms
+                                console.log("Dealer shot", dealerHealth)
+                            }
+                            updateHealthDisplay()                            
+                        })
+
+                    }
+                    else {
+                        sfxPlayer.play(__dirname + "/audio/gunshot_blank.mp3")
+                    }
+
+                    shotgunFired = true
+                }
+                
+                break
+            }
+
+            case (Event.SHOTGUNEJECT): {
+                if (shotgunFired) { // keep silly billies from racking the shotgun too much
+                    shells.unshift()
+                    shotgunFired = false
+
+                    if (shells.length < 1) {
+                        const amounts = SHELLVARIATIONS[Math.floor(Math.random()*(SHELLVARIATIONS.length+1))]
+                        for (let l = 0; l < amounts[0]; l++) shells.push(true)
+                        for (let b = 0; b < amounts[1]; b++) shells.push(false)
+                        
+                        for (let i = 0; i < 4; i++) shells = shells.sort(()=>Math.random()-.5)
+                    }
+                }
+
+                break
+            }
         }
     }
 }
 
-const lcd = new LCD(9, 11, 
-                    25, 8, 7, 1 // who thought this numbering scheme was a good idea
-                )
 
-lcd.begin(16, 2)
 
-const player = new mpg.MpgPlayer()
-player.volume = vol => player._cmd('V', vol)
-player.play("/root/music/General Release.mp3") // override the volume set function because the haters don't want me to go above 100% volume
-
-setTimeout(() => player.stop(), 2500)
-
-async function main() {
+async function main() {  
+    console.log("Now connecting to clients from " + localIp)
     const shotgun = new ClientManager("192.168.3.125", ClientType.SHOTGUN)
 
     
     
 }
+
+main()
 
 async function writeLCD(name) {
     await lcd.clear()

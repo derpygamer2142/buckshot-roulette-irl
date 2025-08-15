@@ -1,3 +1,5 @@
 secret.py
 node_modules
 server/.env
+# not sure if i can use this audio, hiding it for now
+server/audio/*
