@@ -118,7 +118,7 @@ function updateHealthDisplay() {
 function playSFX(file, callback) {
     musicPlayer.volume(50)
     sfxPlayer.volume(25)
-    sfxPlayer.play("dummy_audio.mp3", () => { // "wake up" the process
+    sfxPlayer.play(__dirname + "/audio/dummy_audio.mp3", () => { // "wake up" the process
         sfxPlayer.volume(150)
         sfxPlayer.play(__dirname + "/audio/" + file)
         sfxPlayer.once("end", () => {musicPlayer.volume(75); if (callback) callback()})        
