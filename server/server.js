@@ -65,8 +65,12 @@ const musicPlayer = new mpg.MpgPlayer()
 musicPlayer.volume = vol => musicPlayer._cmd('V', vol) // override the volume set function because the haters don't want me to go above 100% volume
 musicPlayer.play("/root/music/General Release.mp3")
 
+musicPlayer.volume(75)
+
 const sfxPlayer = new mpg.MpgPlayer()
 sfxPlayer.volume = vol => sfxPlayer._cmd('V', vol)
+
+sfxPlayer.volume(150)
 
 /* game logic variables */
 let playerHealth = 6
@@ -113,8 +117,13 @@ function updateHealthDisplay() {
 
 function playSFX(file, callback) {
     musicPlayer.volume(50)
-    sfxPlayer.play(__dirname + "/audio/" + file)
-    sfxPlayer.once("end", () => {musicPlayer.volume(100); if (callback) callback()})
+    sfxPlayer.volume(25)
+    sfxPlayer.play("dummy_audio.mp3", () => { // "wake up" the process
+        sfxPlayer.volume(150)
+        sfxPlayer.play(__dirname + "/audio/" + file)
+        sfxPlayer.once("end", () => {musicPlayer.volume(75); if (callback) callback()})        
+    })
+
 }
 
 
@@ -179,8 +188,9 @@ class ClientManager {
             case (Event.SHOTGUNFIRE): {
                 /** @description false = self, true = opposite */
                 const target = !!Number(data[0])
+                console.log("firing shotgun", shells, shotgunFired)
                 if (!shotgunFired) {
-                    console.log("firing shotgun", shells)
+                    
                     const current = shells[0]
                     if (current) {
                         playerSFX("gunshot_live.mp3", () => {
@@ -209,9 +219,8 @@ class ClientManager {
 
                     }
                     else {
-                        musicPlayer.volume(50)
-                        sfxPlayer.play(__dirname + "/audio/gunshot_blank.mp3")
-                        sfxPlayer.once("end", () => musicPlayer.volume(100))
+                        playSFX("gunshot_blank.mp3")
+                        console.log("fired blank")
                     }
 
                     shotgunFired = true
@@ -221,14 +230,14 @@ class ClientManager {
             }
 
             case (Event.SHOTGUNEJECT): {
+                console.log("racking shotgun", shotgunFired)
                 if (shotgunFired) { // keep silly billies from racking the shotgun too much
                     shells.unshift()
                     shotgunFired = false
-                    console.log("racking shotgun")
                     playSFX("rack shotgun.mp3")
 
                     if (shells.length < 1) {
-                        const amounts = SHELLVARIATIONS[Math.floor(Math.random()*(SHELLVARIATIONS.length+1))]
+                        const amounts = SHELLVARIATIONS[Math.floor(Math.random()*(SHELLVARIATIONS.length))]
                         for (let l = 0; l < amounts[0]; l++) shells.push(true)
                         for (let b = 0; b < amounts[1]; b++) shells.push(false)
                         
