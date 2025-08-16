@@ -193,7 +193,7 @@ class ClientManager {
                     
                     const current = shells[0]
                     if (current) {
-                        playerSFX("gunshot_live.mp3", () => {
+                        playSFX("gunshot_live.mp3", () => {
                             setTimeout(() => {
                                 playSFX("defib discharge.mp3", () => {
                                     if (turn ^ target) {
