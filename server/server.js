@@ -63,7 +63,7 @@ lcd.begin(16, 2)
 
 const musicPlayer = new mpg.MpgPlayer()
 musicPlayer.volume = vol => musicPlayer._cmd('V', vol) // override the volume set function because the haters don't want me to go above 100% volume
-musicPlayer.play("/root/music/General Release.mp3")
+//musicPlayer.play("/root/music/General Release.mp3")
 
 musicPlayer.volume(75)
 
@@ -118,17 +118,23 @@ function updateHealthDisplay() {
 function playSFX(file, callback) {
     musicPlayer.volume(50)
     sfxPlayer.volume(25)
-    sfxPlayer.play(__dirname + "/audio/dummy_audio.mp3", () => { // "wake up" the process
+    sfxPlayer.play(__dirname + "/audio/dummy_audio.mp3")
+
+    sfxPlayer.on("end", () => { // "wake up" the process
         sfxPlayer.volume(150)
         sfxPlayer.play(__dirname + "/audio/" + file)
         sfxPlayer.once("end", () => {musicPlayer.volume(75); if (callback) callback()})        
     })
-
 }
 
 
 class ClientManager {
     constructor(ip, type) {
+        this.initialize(ip, type) // to make reconnection easier
+    }
+    
+    initialize(ip, type) {
+        this.client?.destroy()
         this.client = net.createConnection({ port: 80, host: ip }, () => {
             console.log('Connected to client ' + ip);
 
@@ -138,10 +144,15 @@ class ClientManager {
         this.type = type
 
         this.client.setEncoding('utf8');
+        this.client.setKeepAlive(true, 5000)
+
 
         
         this.client.on("end", () => {
-            console.log("Disconnected from client " + ip); // todo: attempt reconnection
+            console.log("Disconnected from client " + ip);
+
+            this.client.destroy()
+            this.initialize(ip, type)
         });
 
         this.client.on("error", (err) => {
