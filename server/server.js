@@ -141,14 +141,18 @@ async function randomizeShells() {
 
 function playSFX(file, callback) {
     musicPlayer.volume(50)
-    sfxPlayer.volume(25)
+    /*sfxPlayer.volume(25)
     sfxPlayer.play(__dirname + "/audio/dummy_audio.mp3")
 
     sfxPlayer.once("end", () => { // "wake up" the process
         sfxPlayer.volume(150)
         sfxPlayer.play(__dirname + "/audio/" + file)
-        sfxPlayer.once("end", () => {musicPlayer.volume(75); if (callback) callback()})        
-    })
+        sfxPlayer.once("end", () => {musicPlayer.volume(75); if (callback) callback()})
+    })*/
+
+    sfxPlayer.volume(150)
+    sfxPlayer.play(__dirname + "/audio/" + file)
+    sfxPlayer.once("end", () => {musicPlayer.volume(75); if (callback) callback()})
 }
 
 
@@ -272,7 +276,7 @@ class ClientManager {
             case (Event.SHOTGUNEJECT): {
                 console.log("racking shotgun", shotgunFired)
                 if (shotgunFired) { // keep silly billies from racking the shotgun too much
-                    shells.unshift()
+                    shells.shift()
                     shotgunFired = false
                     playSFX("rack shotgun.mp3")
 
