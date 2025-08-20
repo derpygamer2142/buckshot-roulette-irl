@@ -115,12 +115,36 @@ function updateHealthDisplay() {
     dealerHealthLEDs.forEach((v, i) => v.digitalWrite(+((i+1) > dealerHealth)) )
 }
 
+function randomizeHealth() {
+    const v = Math.round((Math.random() * 2) + 2)
+
+    playerHealth = v
+    dealerHealth = v
+
+    updateHealthDisplay()
+}
+
+async function randomizeShells() {
+    const amounts = SHELLVARIATIONS[Math.floor(Math.random()*(SHELLVARIATIONS.length))]
+    for (let l = 0; l < amounts[0]; l++) shells.push(true)
+    for (let b = 0; b < amounts[1]; b++) shells.push(false)
+    
+    for (let i = 0; i < 4; i++) shells = shells.sort(()=>Math.random()-.5)
+
+    await lcd.setCursor(0, 1)
+    await lcd.print(`${amounts[0]} LIVE   ${amounts[1]} BLANK`)
+    setTimeout(async () => {
+        await lcd.setCursor(0, 1)
+        await lcd.print(" ".repeat(16))
+    }, 5000)
+}
+
 function playSFX(file, callback) {
     musicPlayer.volume(50)
     sfxPlayer.volume(25)
     sfxPlayer.play(__dirname + "/audio/dummy_audio.mp3")
 
-    sfxPlayer.on("end", () => { // "wake up" the process
+    sfxPlayer.once("end", () => { // "wake up" the process
         sfxPlayer.volume(150)
         sfxPlayer.play(__dirname + "/audio/" + file)
         sfxPlayer.once("end", () => {musicPlayer.volume(75); if (callback) callback()})        
@@ -253,13 +277,7 @@ class ClientManager {
                     playSFX("rack shotgun.mp3")
 
                     if (shells.length < 1) {
-                        const amounts = SHELLVARIATIONS[Math.floor(Math.random()*(SHELLVARIATIONS.length))]
-                        for (let l = 0; l < amounts[0]; l++) shells.push(true)
-                        for (let b = 0; b < amounts[1]; b++) shells.push(false)
-                        
-                        for (let i = 0; i < 4; i++) shells = shells.sort(()=>Math.random()-.5)
-                        
-                        
+                        randomizeShells()
                     }
                 }
 
@@ -275,6 +293,8 @@ async function main() {
     console.log("Now connecting to clients from " + localIp)
     const shotgun = new ClientManager("192.168.3.125", ClientType.SHOTGUN)
 
+    randomizeShells()
+    randomizeHealth()
     
     
 }
@@ -287,6 +307,8 @@ async function writeLCD(name) {
     await lcd.print("DEALER")
     await lcd.setCursor(16 - name.length, 0) // right of the middle
     await lcd.print(name)
+
+    await lcd.setCursor(2, 1)
 }
 
 const server = http.createServer((req, res) => {
