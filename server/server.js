@@ -63,12 +63,24 @@ lcd.begin(16, 2)
 
 const musicPlayer = new mpg.MpgPlayer()
 musicPlayer.volume = vol => musicPlayer._cmd('V', vol) // override the volume set function because the haters don't want me to go above 100% volume
-//musicPlayer.play("/root/music/General Release.mp3")
+
 
 musicPlayer.volume(75)
 
 const sfxPlayer = new mpg.MpgPlayer()
 sfxPlayer.volume = vol => sfxPlayer._cmd('V', vol)
+
+
+let songs = ["General Release", "Before Every Load", "Socket Calibration"] // lazy
+let currentSong = `/root/music/${songs[Math.round(Math.random()*songs.length)]}.mp3`
+/** @description -1 = game over, 1 = in game */
+let currentState = -1
+
+musicPlayer.on("end", () => {
+    if (currentState === 1) musicPlayer.play(currentSong)
+})
+
+function startMusic() { currentSong = `/root/music/${songs[Math.round(Math.random()*songs.length)]}.mp3`, musicPlayer.play(currentSong) }
 
 sfxPlayer.volume(150)
 
@@ -109,17 +121,21 @@ const dealerHealthLEDs = [1,2,3,4].map((v) => new Gpio(v, { mode: Gpio.OUTPUT}))
 const playerTaser = new Gpio(1, { mode: Gpio.OUTPUT})
 const dealerTaser = new Gpio(1, { mode: Gpio.OUTPUT})
 
+
+
 async function updateHealthDisplay() {
     // todo: flashing when on 1 health
     playerHealthLEDs.forEach((v, i) => v.digitalWrite(+((i+1) > playerHealth)) )
     dealerHealthLEDs.forEach((v, i) => v.digitalWrite(+((i+1) > dealerHealth)) )
 
     if (playerHealth < 1) {
+        currentState = -1
         musicPlayer.stop()
         musicPlayer.play(__dirname + "/audio/You are an Angel.mp3")
         await lcd.clear()
     }
     else if (dealerHealth < 1) {
+        currentState = -1
         musicPlayer.stop()
         musicPlayer.play(__dirname + "/audio/winner.mp3")
         musicPlayer.once("end", () => {
@@ -158,7 +174,7 @@ async function randomizeShells() {
 }
 
 function playSFX(file, callback) {
-    musicPlayer.volume(50)
+    musicPlayer.volume(35)
     /*sfxPlayer.volume(25)
     sfxPlayer.play(__dirname + "/audio/dummy_audio.mp3")
 
@@ -208,7 +224,7 @@ class ClientManager {
                 this.client.destroy()
                 this.initialize(ip, type)
             }
-        });   
+        });
         
         this.client.on("data", (data) => {
             console.log(`Received data from client ${ip}: ${data}`);
@@ -373,6 +389,9 @@ const server = http.createServer((req, res) => {
 
             await randomizeShells()
             randomizeHealth()
+            
+            currentState = 1
+            startMusic()
 
             console.log("READY", dealerHealth, playerHealth, shells, data)
         })
