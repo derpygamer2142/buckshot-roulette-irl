@@ -109,10 +109,24 @@ const dealerHealthLEDs = [1,2,3,4].map((v) => new Gpio(v, { mode: Gpio.OUTPUT}))
 const playerTaser = new Gpio(1, { mode: Gpio.OUTPUT})
 const dealerTaser = new Gpio(1, { mode: Gpio.OUTPUT})
 
-function updateHealthDisplay() {
+async function updateHealthDisplay() {
     // todo: flashing when on 1 health
     playerHealthLEDs.forEach((v, i) => v.digitalWrite(+((i+1) > playerHealth)) )
     dealerHealthLEDs.forEach((v, i) => v.digitalWrite(+((i+1) > dealerHealth)) )
+
+    if (playerHealth < 1) {
+        musicPlayer.stop()
+        musicPlayer.play(__dirname + "/audio/You are an Angel.mp3")
+        await lcd.clear()
+    }
+    else if (dealerHealth < 1) {
+        musicPlayer.stop()
+        musicPlayer.play(__dirname + "/audio/winner.mp3")
+        musicPlayer.once("end", () => {
+            setTimeout(() => musicPlayer.play(__dirname + "/audio/70K.mp3"), 2000)
+        })
+        await lcd.clear()
+    }
 }
 
 function randomizeHealth() {
@@ -125,6 +139,8 @@ function randomizeHealth() {
 }
 
 async function randomizeShells() {
+    if (playerHealth < 1 || dealerHealth < 1) return
+
     const amounts = SHELLVARIATIONS[Math.floor(Math.random()*(SHELLVARIATIONS.length))]
     for (let l = 0; l < amounts[0]; l++) shells.push(true)
     for (let b = 0; b < amounts[1]; b++) shells.push(false)
@@ -210,7 +226,7 @@ class ClientManager {
      * Handle a request from the client
      * @param {Buffer<ArrayBufferLike>} req 
      */
-    handle(req) {
+    async handle(req) {
         const data = req.toString().trim().split(" ")
 
         const event = data.shift()
@@ -233,7 +249,7 @@ class ClientManager {
                 /** @description false = self, true = opposite */
                 const target = !!Number(data[0])
                 console.log("firing shotgun", shells, shotgunFired)
-                if (!shotgunFired) {
+                if (!shotgunFired && playerHealth > 0 && dealerHealth > 0) {
                     
                     const current = shells[0]
                     if (current) {
@@ -273,15 +289,15 @@ class ClientManager {
                 break
             }
 
-            case (Event.SHOTGUNEJECT): {
+            case (Event.SHOTGUNEJECT && playerHealth > 0 && dealerHealth > 0): {
                 console.log("racking shotgun", shotgunFired)
-                if (shotgunFired) { // keep silly billies from racking the shotgun too much
+                if (shotgunFired) { // keep silly billies from racking the shotgun too much and hardware being weird
                     shells.shift()
                     shotgunFired = false
                     playSFX("rack shotgun.mp3")
 
                     if (shells.length < 1) {
-                        randomizeShells()
+                        await randomizeShells()
                     }
                 }
 
@@ -297,7 +313,7 @@ async function main() {
     console.log("Now connecting to clients from " + localIp)
     const shotgun = new ClientManager("192.168.3.125", ClientType.SHOTGUN)
 
-    randomizeShells()
+    await randomizeShells()
     randomizeHealth()
     
     
@@ -309,7 +325,7 @@ async function writeLCD(name) {
     await lcd.clear()
     await lcd.home()
     await lcd.print("DEALER")
-    await lcd.setCursor(16 - name.length, 0) // right of the middle
+    await lcd.setCursor(16 - name.length, 0) // top right
     await lcd.print(name)
 
     await lcd.setCursor(2, 1)
@@ -341,12 +357,18 @@ const server = http.createServer((req, res) => {
         req.on("data", (chunk) => {
             body.push(chunk)
         })
-        req.on("end", () => {
+        req.on("end", async () => {
             const data = Buffer.concat(body).toString()
             console.log("Received name data", data)
             res.writeHead(200).end("OK")
 
-            writeLCD(data)
+            musicPlayer.stop()
+            sfxPlayer.stop()
+
+            await writeLCD(data)
+
+            await randomizeShells()
+            randomizeHealth()
         })
         
     }
