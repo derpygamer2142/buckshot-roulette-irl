@@ -31,5 +31,9 @@ apk del python3 build-base git
 touch /etc/init.d/buckshot-roulette-irl
 ./init.d > /etc/init.d/buckshot-roulette-irl
 chmod +x /etc/init.d/buckshot-roulette-irl
+
+touch /var/log/buckshot-roulette-irl.log /var/log/buckshot-roulette-irl.err
+chmod 644 /var/log/buckshot-roulette-irl.*
+
 rc-update add buckshot-roulette-irl default
 rc-service buckshot-roulette-irl start

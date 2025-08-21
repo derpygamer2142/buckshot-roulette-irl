@@ -72,7 +72,7 @@ sfxPlayer.volume = vol => sfxPlayer._cmd('V', vol)
 
 
 let songs = ["General Release", "Before Every Load", "Socket Calibration"] // lazy
-let currentSong = `/root/music/${songs[Math.round(Math.random()*songs.length)]}.mp3`
+let currentSong = `/root/music/${songs[Math.round((Math.random()*songs.length-1))]}.mp3`
 /** @description -1 = game over, 1 = in game */
 let currentState = -1
 
@@ -80,7 +80,7 @@ musicPlayer.on("end", () => {
     if (currentState === 1) musicPlayer.play(currentSong)
 })
 
-function startMusic() { currentSong = `/root/music/${songs[Math.round(Math.random()*songs.length)]}.mp3`, musicPlayer.play(currentSong) }
+function startMusic() { currentSong = `/root/music/${songs[Math.round(Math.random()*(songs.length-1))]}.mp3`, musicPlayer.play(currentSong) }
 
 sfxPlayer.volume(150)
 
@@ -132,6 +132,7 @@ async function updateHealthDisplay() {
         currentState = -1
         musicPlayer.stop()
         musicPlayer.play(__dirname + "/audio/You are an Angel.mp3")
+        console.log("GAME OVER - WINNER: DEALER")
         await lcd.clear()
     }
     else if (dealerHealth < 1) {
@@ -140,6 +141,7 @@ async function updateHealthDisplay() {
         musicPlayer.play(__dirname + "/audio/winner.mp3")
         musicPlayer.once("end", () => {
             setTimeout(() => musicPlayer.play(__dirname + "/audio/70K.mp3"), 2000)
+            console.log("GAME OVER - WINNER: PLAYER")
         })
         await lcd.clear()
     }
@@ -266,7 +268,7 @@ class ClientManager {
                 const target = !!Number(data[0])
                 console.log("firing shotgun", shells, shotgunFired)
                 if (!shotgunFired && currentState === 1) {
-                    
+                    console.log("turn:", turn, "target:", target)
                     const current = shells[0]
                     if (current) {
                         playSFX("gunshot_live.mp3", () => {
@@ -391,6 +393,7 @@ const server = http.createServer((req, res) => {
             randomizeHealth()
             
             currentState = 1
+            turn = false // player starts
             startMusic()
 
             console.log("READY", dealerHealth, playerHealth, shells, data)
