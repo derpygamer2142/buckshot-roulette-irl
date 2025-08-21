@@ -72,7 +72,7 @@ sfxPlayer.volume = vol => sfxPlayer._cmd('V', vol)
 
 
 let songs = ["General Release", "Before Every Load", "Socket Calibration"] // lazy
-let currentSong = `/root/music/${songs[Math.round((Math.random()*songs.length-1))]}.mp3`
+let currentSong = `/root/music/${songs[Math.round((Math.random()*(songs.length-1)))]}.mp3`
 /** @description -1 = game over, 1 = in game */
 let currentState = -1
 
