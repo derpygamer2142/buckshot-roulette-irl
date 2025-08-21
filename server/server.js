@@ -220,10 +220,8 @@ class ClientManager {
         this.client.on("error", (err) => {
             console.error("Client " + ip + " error:", err);
             console.log("code: ", err.code)
-            if (err.code === "ECONNRESET" || err.code === "ETIMEDOUT") {
-                this.client.destroy()
-                this.initialize(ip, type)
-            }
+            this.client.destroy()
+            this.initialize(ip, type)
         });
         
         this.client.on("data", (data) => {
