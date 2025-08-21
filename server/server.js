@@ -265,7 +265,7 @@ class ClientManager {
                 /** @description false = self, true = opposite */
                 const target = !!Number(data[0])
                 console.log("firing shotgun", shells, shotgunFired)
-                if (!shotgunFired && playerHealth > 0 && dealerHealth > 0) {
+                if (!shotgunFired && currentState === 1) {
                     
                     const current = shells[0]
                     if (current) {
@@ -307,7 +307,7 @@ class ClientManager {
 
             case (Event.SHOTGUNEJECT): {
                 console.log("racking shotgun", shotgunFired)
-                if (shotgunFired && playerHealth > 0 && dealerHealth > 0) { // keep silly billies from racking the shotgun too much and hardware being weird
+                if (shotgunFired && currentState === 1) { // keep silly billies from racking the shotgun too much and hardware being weird
                     shells.shift()
                     shotgunFired = false
                     playSFX("rack shotgun.mp3")
