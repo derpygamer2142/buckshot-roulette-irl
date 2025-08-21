@@ -288,7 +288,7 @@ class ClientManager {
 
                                     playSFX("health reduce.mp3")
                                 })
-                            }, 1500)
+                            }, 1000)
 
                          
                         })
@@ -315,6 +315,8 @@ class ClientManager {
                     if (shells.length < 1) {
                         await randomizeShells()
                     }
+
+                    turn = !turn
                 }
 
                 break

@@ -6,11 +6,7 @@ import time
 SSID="SSID"
 PASSWORD="PASSWORD"
 
-targetSwitch = Pin(0, Pin.IN)
 targetLED = Pin(2, Pin.OUT)
-
-triggerButton = Pin(15, Pin.IN, value=0)
-rackButton = Pin(17, Pin.IN, value=0)
 
 lastTriggerValue = 0 # for detecting changes
 lastRackValue = 0    # for detecting changes
@@ -123,6 +119,10 @@ class ConnectionManager:
         while True:
             if ((time.time() - startTime) % 2 < 1): pico_led.on()
             else: pico_led.off()
+            
+            targetSwitch = Pin(0, Pin.IN, Pin.PULL_DOWN)
+            triggerButton = Pin(15, Pin.IN, Pin.PULL_DOWN, value=0)
+            rackButton = Pin(17, Pin.IN, Pin.PULL_DOWN, value=0)
 
             currentTrigger = triggerButton.value()
             currentRack    = rackButton.value()
@@ -136,6 +136,12 @@ class ConnectionManager:
             lastRackValue = currentRack
 
             targetLED.value(targetSwitch.value())
+            
+            targetSwitch = Pin(0, Pin.OUT) # https://forums.pimoroni.com/t/rp2350-gpio-internal-pull-problem-and-simplistic-workaround/25443
+            triggerButton = Pin(15, Pin.OUT)
+            rackButton = Pin(17, Pin.OUT)
+            
+            
 
             # try to accept the connection from the server
             if self.socket == None: 
