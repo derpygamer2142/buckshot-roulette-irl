@@ -289,9 +289,9 @@ class ClientManager {
                 break
             }
 
-            case (Event.SHOTGUNEJECT && playerHealth > 0 && dealerHealth > 0): {
+            case (Event.SHOTGUNEJECT): {
                 console.log("racking shotgun", shotgunFired)
-                if (shotgunFired) { // keep silly billies from racking the shotgun too much and hardware being weird
+                if (shotgunFired && playerHealth > 0 && dealerHealth > 0) { // keep silly billies from racking the shotgun too much and hardware being weird
                     shells.shift()
                     shotgunFired = false
                     playSFX("rack shotgun.mp3")
