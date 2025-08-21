@@ -141,6 +141,8 @@ function randomizeHealth() {
 async function randomizeShells() {
     if (playerHealth < 1 || dealerHealth < 1) return
 
+    shells = []
+
     const amounts = SHELLVARIATIONS[Math.floor(Math.random()*(SHELLVARIATIONS.length))]
     for (let l = 0; l < amounts[0]; l++) shells.push(true)
     for (let b = 0; b < amounts[1]; b++) shells.push(false)
@@ -202,7 +204,7 @@ class ClientManager {
         this.client.on("error", (err) => {
             console.error("Client " + ip + " error:", err);
             console.log("code: ", err.code)
-            if (err.code === "ECONNRESET") {
+            if (err.code === "ECONNRESET" || err.code === "ETIMEDOUT") {
                 this.client.destroy()
                 this.initialize(ip, type)
             }
@@ -364,11 +366,15 @@ const server = http.createServer((req, res) => {
 
             musicPlayer.stop()
             sfxPlayer.stop()
+            
+            shotgunFired = false
 
             await writeLCD(data)
 
             await randomizeShells()
             randomizeHealth()
+
+            console.log("READY", dealerHealth, playerHealth, shells, data)
         })
         
     }
