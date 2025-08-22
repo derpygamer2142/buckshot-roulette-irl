@@ -113,13 +113,13 @@ let shotgunFired = false
  * i would probably need to implement another library in js
  * i would probably use all the pwm pins and have the same issue
 */
-const playerHealthLEDs = [1,2,3,4].map((v) => new Gpio(v, { mode: Gpio.OUTPUT})) 
-const dealerHealthLEDs = [1,2,3,4].map((v) => new Gpio(v, { mode: Gpio.OUTPUT}))
+const playerHealthLEDs = [17, 27, 22, 14].map((v) => new Gpio(v, { mode: Gpio.OUTPUT})) 
+const dealerHealthLEDs = [26, 19, 13, 6].map((v) => new Gpio(v, { mode: Gpio.OUTPUT}))
 
 // brendan eich definitely intended for javascript to be used to control tasers in a real life adaptation of
 // a game about organ harvesting(headcanon) and gambling
-const playerTaser = new Gpio(1, { mode: Gpio.OUTPUT})
-const dealerTaser = new Gpio(1, { mode: Gpio.OUTPUT})
+const playerTaser = new Gpio(20, { mode: Gpio.OUTPUT})
+const dealerTaser = new Gpio(21, { mode: Gpio.OUTPUT})
 
 
 
@@ -347,8 +347,6 @@ async function writeLCD(name) {
     await lcd.print("DEALER")
     await lcd.setCursor(16 - name.length, 0) // top right
     await lcd.print(name)
-
-    await lcd.setCursor(2, 1)
 }
 
 const server = http.createServer((req, res) => {
