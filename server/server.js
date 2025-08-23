@@ -55,9 +55,9 @@ const Event = {
     "SHOTGUNFIRE": "SHOTGUNFIRE"
 }
 
-const lcd = new LCD(9, 11, 
-                    25, 8, 7, 1 // who thought this numbering scheme was a good idea
-                )
+const lcd = new LCD(12, 5, 
+                    0, 11, 9, 10
+                   )
 
 lcd.begin(16, 2)
 
