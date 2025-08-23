@@ -123,8 +123,8 @@ const dealerTaser = new Gpio(21, { mode: Gpio.OUTPUT})
 
 async function updateHealthDisplay() {
     // todo: flashing when on 1 health
-    playerHealthLEDs.forEach((v, i) => v.digitalWrite(+((i+1) > playerHealth)) )
-    dealerHealthLEDs.forEach((v, i) => v.digitalWrite(+((i+1) > dealerHealth)) )
+    playerHealthLEDs.forEach((v, i) => v.digitalWrite(+((i+1) < playerHealth)) )
+    dealerHealthLEDs.forEach((v, i) => v.digitalWrite(+((i+1) < dealerHealth)) )
 
     if (playerHealth < 1) {
         currentState = -1
@@ -164,6 +164,10 @@ async function randomizeShells() {
     for (let b = 0; b < amounts[1]; b++) shells.push(false)
     
     for (let i = 0; i < 4; i++) shells = shells.sort(()=>Math.random()-.5)
+
+    for (let i = 0; i < shells.length; i++) {
+        await new Promise((res) => { playSFX("load single shell.mp3", () => setTimeout(() => res(), 500)) }) // i now understand the meaning of callback hell
+    }
 
     await lcd.setCursor(0, 1)
     await lcd.print(`${amounts[0]} LIVE   ${amounts[1]} BLANK`)
@@ -317,6 +321,8 @@ class ClientManager {
                     }
 
                     turn = !turn
+                    await lcd.setCursor(7, 0)
+                    await lcd.write(turn ? "X " : " X") // current turn display
                 }
 
                 break
@@ -332,8 +338,8 @@ async function main() {
     const shotgun = new ClientManager("192.168.3.182", ClientType.SHOTGUN)
 
     await lcd.begin(16, 2)
-    await randomizeShells()
-    randomizeHealth()
+    // await randomizeShells()
+    // randomizeHealth()
     
     
 }
@@ -346,6 +352,8 @@ async function writeLCD(name) {
     await lcd.print("DEALER")
     await lcd.setCursor(16 - name.length, 0) // top right
     await lcd.print(name)
+    await lcd.setCursor(7, 0)
+    await lcd.write(" X") // current turn display
 }
 
 const server = http.createServer((req, res) => {
