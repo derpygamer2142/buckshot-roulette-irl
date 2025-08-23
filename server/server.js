@@ -125,8 +125,8 @@ const dealerTaser = new Gpio(21, { mode: Gpio.OUTPUT})
 
 async function updateHealthDisplay() {
     // todo: flashing when on 1 health
-    //playerHealthLEDs.forEach((v, i) => v.digitalWrite(+((i+1) > playerHealth)) )
-    //dealerHealthLEDs.forEach((v, i) => v.digitalWrite(+((i+1) > dealerHealth)) )
+    playerHealthLEDs.forEach((v, i) => v.digitalWrite(+((i+1) > playerHealth)) )
+    dealerHealthLEDs.forEach((v, i) => v.digitalWrite(+((i+1) > dealerHealth)) )
 
     if (playerHealth < 1) {
         currentState = -1
@@ -167,12 +167,12 @@ async function randomizeShells() {
     
     for (let i = 0; i < 4; i++) shells = shells.sort(()=>Math.random()-.5)
 
-    /*await lcd.setCursor(0, 1)
+    await lcd.setCursor(0, 1)
     await lcd.print(`${amounts[0]} LIVE   ${amounts[1]} BLANK`)
     setTimeout(async () => {
         await lcd.setCursor(0, 1)
         await lcd.print(" ".repeat(16))
-    }, 5000)*/
+    }, 5000)
 }
 
 function playSFX(file, callback) {
