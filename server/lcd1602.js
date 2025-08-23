@@ -88,7 +88,7 @@ class LCD {
         this._numlines = 0 // number of text lines
         this._row_offsets = [0, 0, 0, 0]
 
-        this.init(1, rs, 255, enable, d0, d1, d2, d3, 0, 0, 0, 0)
+        this.init(1, rs, 255, enable, d0, d1, d2, d3, -1, -1, -1, -1)
     }
 
     init(fourbitmode, rs, rw, enable,
@@ -100,7 +100,7 @@ class LCD {
         
         this._enable_pin = new Gpio(enable, { mode: Gpio.OUTPUT })
 
-        this._data_pins = [d0, d1, d2, d3, d4, d5, d6, d7].map((pin) => pin === 0 ? null : new Gpio(pin, { mode: Gpio.OUTPUT }))
+        this._data_pins = [d0, d1, d2, d3, d4, d5, d6, d7].map((pin) => pin === -1 ? null : new Gpio(pin, { mode: Gpio.OUTPUT }))
 
         if (fourbitmode) {
             this._displayfunction = LCD_4BITMODE | LCD_1LINE | LCD_5x8DOTS
