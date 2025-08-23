@@ -123,8 +123,8 @@ const dealerTaser = new Gpio(21, { mode: Gpio.OUTPUT})
 
 async function updateHealthDisplay() {
     // todo: flashing when on 1 health
-    playerHealthLEDs.forEach((v, i) => v.digitalWrite(+((i+1) < playerHealth)) )
-    dealerHealthLEDs.forEach((v, i) => v.digitalWrite(+((i+1) < dealerHealth)) )
+    playerHealthLEDs.forEach((v, i) => v.digitalWrite(+((i) < playerHealth)) )
+    dealerHealthLEDs.forEach((v, i) => v.digitalWrite(+((i) < dealerHealth)) )
 
     if (playerHealth < 1) {
         currentState = -1
@@ -166,7 +166,7 @@ async function randomizeShells() {
     for (let i = 0; i < 4; i++) shells = shells.sort(()=>Math.random()-.5)
 
     for (let i = 0; i < shells.length; i++) {
-        await new Promise((res) => { playSFX("load single shell.mp3", () => setTimeout(() => res(), 500)) }) // i now understand the meaning of callback hell
+        await new Promise((res) => { playSFX("load single shell.mp3", () => setTimeout(() => res(), 200)) }) // i now understand the meaning of callback hell
     }
 
     await lcd.setCursor(0, 1)
@@ -266,7 +266,7 @@ class ClientManager {
             }
 
             case (Event.SHOTGUNFIRE): {
-                /** @description false = self, true = opposite */
+                /** @description false = opposite, true = true */
                 const target = !!Number(data[0])
                 console.log("firing shotgun", shells, shotgunFired)
                 if (!shotgunFired && currentState === 1) {
@@ -322,7 +322,7 @@ class ClientManager {
 
                     turn = !turn
                     await lcd.setCursor(7, 0)
-                    await lcd.write(turn ? "X " : " X") // current turn display
+                    await lcd.print(turn ? "X " : " X") // current turn display
                 }
 
                 break
@@ -353,7 +353,7 @@ async function writeLCD(name) {
     await lcd.setCursor(16 - name.length, 0) // top right
     await lcd.print(name)
     await lcd.setCursor(7, 0)
-    await lcd.write(" X") // current turn display
+    await lcd.print(" X") // current turn display
 }
 
 const server = http.createServer((req, res) => {
