@@ -27,7 +27,8 @@ function getLocalIp() {
            ) return net.address
     }
 
-    throw new Error("Could not find local ip", networkInterfaces())
+    // throw new Error("Could not find local ip", networkInterfaces())
+    return getLocalIp() // this totally won't crash
 }
 
 const localIp = getLocalIp()
@@ -129,18 +130,21 @@ async function updateHealthDisplay() {
     if (playerHealth < 1) {
         currentState = -1
         musicPlayer.stop()
-        musicPlayer.play(__dirname + "/audio/You are an Angel.mp3")
+        setTimeout(() => musicPlayer.play(__dirname + "/audio/You are an Angel.mp3"), 150)
         console.log("GAME OVER - WINNER: DEALER")
         await lcd.clear()
     }
     else if (dealerHealth < 1) {
         currentState = -1
         musicPlayer.stop()
-        musicPlayer.play(__dirname + "/audio/winner.mp3")
-        musicPlayer.once("end", () => {
-            setTimeout(() => musicPlayer.play(__dirname + "/audio/70K.mp3"), 2000)
-            console.log("GAME OVER - WINNER: PLAYER")
-        })
+        setTimeout(() => {
+            musicPlayer.play(__dirname + "/audio/winner.mp3")
+            musicPlayer.once("end", () => {
+                setTimeout(() => musicPlayer.play(__dirname + "/audio/70K.mp3"), 2000)
+                console.log("GAME OVER - WINNER: PLAYER")
+            })
+        }, 150)
+
         await lcd.clear()
     }
 }
