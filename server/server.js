@@ -59,8 +59,6 @@ const lcd = new LCD(12, 5,
                     0, 11, 9, 10
                    )
 
-lcd.begin(16, 2)
-
 const musicPlayer = new mpg.MpgPlayer()
 musicPlayer.volume = vol => musicPlayer._cmd('V', vol) // override the volume set function because the haters don't want me to go above 100% volume
 
@@ -333,6 +331,7 @@ async function main() {
     console.log("Now connecting to clients from " + localIp)
     const shotgun = new ClientManager("192.168.3.182", ClientType.SHOTGUN)
 
+    await lcd.begin(16, 2)
     await randomizeShells()
     randomizeHealth()
     
