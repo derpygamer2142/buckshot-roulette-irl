@@ -119,7 +119,7 @@ const dealerHealthLEDs = [26, 19, 13, 6].map((v) => new Gpio(v, { mode: Gpio.OUT
 // a game about organ harvesting(headcanon) and gambling
 const playerTaser = new Gpio(20, { mode: Gpio.OUTPUT})
 const dealerTaser = new Gpio(21, { mode: Gpio.OUTPUT})
-
+const taserEnable = new Gpio(16, { mode: Gpio.OUTPUT})
 
 
 async function updateHealthDisplay() {
@@ -283,13 +283,15 @@ class ClientManager {
                                     if (turn ^ target) {
                                         playerHealth -= 1
                                         playerTaser.digitalWrite(1)
-                                        setTimeout(() => playerTaser.digitalWrite(0), 500) // tase them for 500ms
+                                        taserEnable.digitalWrite(1)
+                                        setTimeout(() => {playerTaser.digitalWrite(0); taserEnable.digitalWrite(0)}, 500) // tase them for 500ms
                                         console.log("Player shot", playerHealth)
                                     }
                                     else {
                                         dealerHealth -= 1
                                         dealerTaser.digitalWrite(1)
-                                        setTimeout(() => dealerTaser.digitalWrite(0), 500) // tase them for 500ms
+                                        taserEnable.digitalWrite(1)
+                                        setTimeout(() => {dealerTaser.digitalWrite(0); taserEnable.digitalWrite(0)}, 500) // tase them for 500ms
                                         console.log("Dealer shot", dealerHealth)
                                     }
                                     updateHealthDisplay()
