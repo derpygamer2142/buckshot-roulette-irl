@@ -341,7 +341,7 @@ class ClientManager {
 
 async function main() {  
     console.log("Now connecting to clients from " + localIp)
-    const shotgun = new ClientManager("192.168.3.182", ClientType.SHOTGUN)
+    const shotgun = new ClientManager("192.168.3.183", ClientType.SHOTGUN)
 
     await lcd.begin(16, 2)
     // await randomizeShells()
