@@ -180,17 +180,17 @@ async function randomizeShells() {
     // await lcd.print(`${amounts[0]} LIVE   ${amounts[1]} BLANK`)
     for (let i = 0; i < liveLEDs.length; i++) {
         if (amounts[0] >= i+1) {
-            liveLEDs[i].on()
+            liveLEDs[i].digitalWrite(1)
         }
         else {
-            liveLEDs[i].off()
+            liveLEDs[i].digitalWrite(0)
         }
 
         if (amounts[1] >= i+1) {
-            blankLEDs[i].on()
+            blankLEDs[i].digitalWrite(1)
         }
         else {
-            blankLEDs[i].off()
+            blankLEDs[i].digitalWrite(0)
         }
     }
 
@@ -198,8 +198,8 @@ async function randomizeShells() {
         // await lcd.setCursor(0, 1)
         // await lcd.print(" ".repeat(16))
         for (let i = 0; i < liveLEDs.length; i++) {
-            liveLEDs[i].off();
-            blankLEDs[i].off();
+            liveLEDs[i].digitalWrite(0);
+            blankLEDs[i].digitalWrite(0);
         }
     }, 5000)
 }
@@ -351,12 +351,12 @@ class ClientManager {
                     // turn == false -> player's turn
                     if (turn) {
                         // light up the shell indicator led closest to the player whose turn it is
-                        blankLEDs[0].on()
-                        liveLEDs[3].off()
+                        blankLEDs[0].digitalWrite(1)
+                        liveLEDs[3].digitalWrite(0)
                     }
                     else {
-                        blankLEDs[0].off()
-                        liveLEDs[3].on()
+                        blankLEDs[0].digitalWrite(0)
+                        liveLEDs[3].digitalWrite(1)
                     }
                     // await lcd.setCursor(7, 0)
                     // await lcd.print(turn ? "X " : " X") // current turn display
@@ -393,7 +393,7 @@ async function writeLCD(name) {
     await lcd.setCursor(7, 0)
     await lcd.print(" X") // current turn display
     */
-   liveLEDs[3].on()
+   liveLEDs[3].digitalWrite(1)
 }
 
 const server = http.createServer((req, res) => {
