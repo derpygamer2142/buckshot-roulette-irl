@@ -35,6 +35,7 @@ class ConnectionManager:
     def connect(self):
         pico_led.on()
         wlan = network.WLAN(network.STA_IF)
+        wlan.ifconfig(('192.168.3.183', '255.255.255.0', '192.168.3.1', '192.168.3.1'))
         wlan.active(True)
         wlan.connect(SSID, PASSWORD)
             
@@ -53,7 +54,7 @@ class ConnectionManager:
         else:
             print('connected')
             status = wlan.ifconfig()
-            print( 'ip = ' + status[0] )
+            print( 'ip = ' + status[0], status )
         
         pico_led.off()
 
@@ -121,8 +122,8 @@ class ConnectionManager:
             else: pico_led.off()
             
             targetSwitch = Pin(0, Pin.IN, Pin.PULL_DOWN)
-            triggerButton = Pin(15, Pin.IN, Pin.PULL_DOWN, value=0)
-            rackButton = Pin(17, Pin.IN, Pin.PULL_DOWN, value=0)
+            triggerButton = Pin(15, Pin.IN, Pin.PULL_DOWN)
+            rackButton = Pin(17, Pin.IN, Pin.PULL_DOWN)
 
             currentTrigger = triggerButton.value()
             currentRack    = rackButton.value()

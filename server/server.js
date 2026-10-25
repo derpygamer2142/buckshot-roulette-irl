@@ -150,7 +150,8 @@ async function updateHealthDisplay() {
 }
 
 function randomizeHealth() {
-    const v = Math.round((Math.random() * 2) + 2)
+    //debug
+    const v = 4;//Math.round((Math.random() * 2) + 2)
 
     playerHealth = v
     dealerHealth = v
@@ -284,14 +285,14 @@ class ClientManager {
                                         playerHealth -= 1
                                         playerTaser.digitalWrite(1)
                                         taserEnable.digitalWrite(1)
-                                        setTimeout(() => {playerTaser.digitalWrite(0); taserEnable.digitalWrite(0)}, 500) // tase them for 500ms
+                                        setTimeout(() => {playerTaser.digitalWrite(0); taserEnable.digitalWrite(0)}, 150) // tase them for 150ms
                                         console.log("Player shot", playerHealth)
                                     }
                                     else {
                                         dealerHealth -= 1
                                         dealerTaser.digitalWrite(1)
                                         taserEnable.digitalWrite(1)
-                                        setTimeout(() => {dealerTaser.digitalWrite(0); taserEnable.digitalWrite(0)}, 500) // tase them for 500ms
+                                        setTimeout(() => {dealerTaser.digitalWrite(0); taserEnable.digitalWrite(0)}, 150) // tase them for 150ms
                                         console.log("Dealer shot", dealerHealth)
                                     }
                                     updateHealthDisplay()
