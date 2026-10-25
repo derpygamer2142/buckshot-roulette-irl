@@ -172,10 +172,6 @@ async function randomizeShells() {
     
     for (let i = 0; i < 4; i++) shells = shells.sort(()=>Math.random()-.5)
 
-    for (let i = 0; i < shells.length; i++) {
-        await new Promise((res) => { playSFX("load single shell.mp3", () => setTimeout(() => res(), 200)) }) // i now understand the meaning of callback hell
-    }
-
     // await lcd.setCursor(0, 1)
     // await lcd.print(`${amounts[0]} LIVE   ${amounts[1]} BLANK`)
     for (let i = 0; i < liveLEDs.length; i++) {
@@ -200,6 +196,10 @@ async function randomizeShells() {
         for (let i = 0; i < liveLEDs.length; i++) {
             liveLEDs[i].digitalWrite(0);
             blankLEDs[i].digitalWrite(0);
+        }
+
+        for (let i = 0; i < shells.length; i++) {
+            await new Promise((res) => { playSFX("load single shell.mp3", () => setTimeout(() => res(), 200)) }) // i now understand the meaning of callback hell
         }
     }, 5000)
 }
@@ -393,7 +393,7 @@ async function writeLCD(name) {
     await lcd.setCursor(7, 0)
     await lcd.print(" X") // current turn display
     */
-   liveLEDs[3].digitalWrite(1)
+//    liveLEDs[3].digitalWrite(1)
 }
 
 const server = http.createServer((req, res) => {
@@ -432,9 +432,10 @@ const server = http.createServer((req, res) => {
             
             shotgunFired = false
 
-            await writeLCD(data)
+            // await writeLCD(data)
 
             await randomizeShells()
+            liveLEDs[3].digitalWrite(1) // Display turn
             randomizeHealth()
             
             currentState = 1
