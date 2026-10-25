@@ -56,9 +56,9 @@ const Event = {
     "SHOTGUNFIRE": "SHOTGUNFIRE"
 }
 
-const lcd = new LCD(12, 5, 
+/*const lcd = new LCD(12, 5, 
                     0, 11, 9, 10
-                   )
+                   )*/
 
 const musicPlayer = new mpg.MpgPlayer()
 musicPlayer.volume = vol => musicPlayer._cmd('V', vol) // override the volume set function because the haters don't want me to go above 100% volume
@@ -112,14 +112,16 @@ let shotgunFired = false
  * i would probably need to implement another library in js
  * i would probably use all the pwm pins and have the same issue
 */
-const playerHealthLEDs = [17, 27, 22, 14].map((v) => new Gpio(v, { mode: Gpio.OUTPUT})) 
+const playerHealthLEDs = [17, 27, 22, 14].map((v) => new Gpio(v, { mode: Gpio.OUTPUT}))
 const dealerHealthLEDs = [26, 19, 13, 6].map((v) => new Gpio(v, { mode: Gpio.OUTPUT}))
+
+const liveLEDs = [15, 18, 23, 24].map((v) => new Gpio(v, { mode: Gpio.OUTPUT}))
+const blankLEDs = [25, 8, 7, 1].map((v) => new Gpio(v, { mode: Gpio.OUTPUT}))
 
 // brendan eich definitely intended for javascript to be used to control tasers in a real life adaptation of
 // a game about organ harvesting(headcanon) and gambling
 const playerTaser = new Gpio(20, { mode: Gpio.OUTPUT})
 const dealerTaser = new Gpio(21, { mode: Gpio.OUTPUT})
-const taserEnable = new Gpio(16, { mode: Gpio.OUTPUT})
 
 
 async function updateHealthDisplay() {
@@ -132,7 +134,7 @@ async function updateHealthDisplay() {
         musicPlayer.stop()
         setTimeout(() => musicPlayer.play(__dirname + "/audio/You are an Angel.mp3"), 150)
         console.log("GAME OVER - WINNER: DEALER")
-        await lcd.clear()
+        // await lcd.clear()
     }
     else if (dealerHealth < 1) {
         currentState = -1
@@ -145,7 +147,7 @@ async function updateHealthDisplay() {
             })
         }, 150)
 
-        await lcd.clear()
+        // await lcd.clear()
     }
 }
 
@@ -174,11 +176,31 @@ async function randomizeShells() {
         await new Promise((res) => { playSFX("load single shell.mp3", () => setTimeout(() => res(), 200)) }) // i now understand the meaning of callback hell
     }
 
-    await lcd.setCursor(0, 1)
-    await lcd.print(`${amounts[0]} LIVE   ${amounts[1]} BLANK`)
+    // await lcd.setCursor(0, 1)
+    // await lcd.print(`${amounts[0]} LIVE   ${amounts[1]} BLANK`)
+    for (let i = 0; i < liveLEDs.length; i++) {
+        if (amounts[0] >= i+1) {
+            liveLEDs[i].on()
+        }
+        else {
+            liveLEDs[i].off()
+        }
+
+        if (amounts[1] >= i+1) {
+            blankLEDs[i].on()
+        }
+        else {
+            blankLEDs[i].off()
+        }
+    }
+
     setTimeout(async () => {
-        await lcd.setCursor(0, 1)
-        await lcd.print(" ".repeat(16))
+        // await lcd.setCursor(0, 1)
+        // await lcd.print(" ".repeat(16))
+        for (let i = 0; i < liveLEDs.length; i++) {
+            liveLEDs[i].off();
+            blankLEDs[i].off();
+        }
     }, 5000)
 }
 
@@ -284,15 +306,13 @@ class ClientManager {
                                     if (turn ^ target) {
                                         playerHealth -= 1
                                         playerTaser.digitalWrite(1)
-                                        taserEnable.digitalWrite(1)
-                                        setTimeout(() => {playerTaser.digitalWrite(0); taserEnable.digitalWrite(0)}, 150) // tase them for 150ms
+                                        setTimeout(() => playerTaser.digitalWrite(0), 150) // tase them for 150ms
                                         console.log("Player shot", playerHealth)
                                     }
                                     else {
                                         dealerHealth -= 1
                                         dealerTaser.digitalWrite(1)
-                                        taserEnable.digitalWrite(1)
-                                        setTimeout(() => {dealerTaser.digitalWrite(0); taserEnable.digitalWrite(0)}, 150) // tase them for 150ms
+                                        setTimeout(() => dealerTaser.digitalWrite(0), 150) // tase them for 150ms
                                         console.log("Dealer shot", dealerHealth)
                                     }
                                     updateHealthDisplay()
@@ -328,8 +348,18 @@ class ClientManager {
                     }
 
                     turn = !turn
-                    await lcd.setCursor(7, 0)
-                    await lcd.print(turn ? "X " : " X") // current turn display
+                    // turn == false -> player's turn
+                    if (turn) {
+                        // light up the shell indicator led closest to the player whose turn it is
+                        blankLEDs[0].on()
+                        liveLEDs[3].off()
+                    }
+                    else {
+                        blankLEDs[0].off()
+                        liveLEDs[3].on()
+                    }
+                    // await lcd.setCursor(7, 0)
+                    // await lcd.print(turn ? "X " : " X") // current turn display
                 }
 
                 break
@@ -344,7 +374,7 @@ async function main() {
     console.log("Now connecting to clients from " + localIp)
     const shotgun = new ClientManager("192.168.3.183", ClientType.SHOTGUN)
 
-    await lcd.begin(16, 2)
+    // await lcd.begin(16, 2)
     // await randomizeShells()
     // randomizeHealth()
     
@@ -354,6 +384,7 @@ async function main() {
 main()
 
 async function writeLCD(name) {
+    /*
     await lcd.clear()
     await lcd.home()
     await lcd.print("DEALER")
@@ -361,6 +392,8 @@ async function writeLCD(name) {
     await lcd.print(name)
     await lcd.setCursor(7, 0)
     await lcd.print(" X") // current turn display
+    */
+   liveLEDs[3].on()
 }
 
 const server = http.createServer((req, res) => {
